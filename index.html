@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Trèfle – Simulateur</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a8">
+<style>
+body { font-family: Arial; padding: 20px; background: #f6f6f6; }
+h1 { color: #1a8; font-size: 26px; }
+.container { background: white; padding: 20px; border-radius: 12px; width: 95%; max-width: 600px; }
+label { font-size: 18px; }
+.slider { width: 100%; }
+.result-box, .pillars {
+    background: #fff; padding: 15px; border-radius: 10px; margin-top: 15px;
+    box-shadow: 0 0 4px rgba(0,0,0,0.1);
+}
+.pillar { display: flex; justify-content: space-between; padding: 4px 0; font-size: 16px; }
+.value { font-weight: bold; color: #28a; }
+</style>
+
+<script>
+// register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    simulate();
+});
+
+function formatNumber(n){
+    return n.toLocaleString('fr-FR', {minimumFractionDigits:0});
+}
+
+function simulate(){
+    let start = parseFloat(document.getElementById("capital").value);
+    document.getElementById("startval").innerHTML = formatNumber(start);
+
+    let cap = start;
+    let rate = 0.03;
+    let withdraw = 0.0089;
+
+    for (let i = 0; i < 25; i++){
+        cap = cap * (1 + rate) - cap * withdraw;
+    }
+
+    document.getElementById("cap25").innerHTML = formatNumber(cap);
+
+    document.getElementById("vie").innerHTML = formatNumber(cap * 0.30);
+    document.getElementById("plaisir").innerHTML = formatNumber(cap * 0.10);
+    document.getElementById("modere").innerHTML = formatNumber(cap * 0.15);
+    document.getElementById("immo").innerHTML = formatNumber(cap * 0.15);
+    document.getElementById("dons").innerHTML = formatNumber(cap * 0.10);
+    document.getElementById("herit").innerHTML = formatNumber(cap * 0.20);
+}
+</script>
+</head>
+
+<body>
+
+<h1>Trèfle – Simulateur financier</h1>
+
+<div class="container">
+    <label><b>Capital de départ :</b> <span id="startval">1 000 000</span> €</label><br><br>
+    <input type="range" id="capital" min="1000000" max="300000000" value="1000000" step="1000000"
+           class="slider" oninput="simulate()">
+
+    <div class="result-box">
+        <p>💰 <b>Capital après 25 ans :</b> <span id="cap25">0</span> €</p>
+    </div>
+
+    <div class="pillars">
+        <h3>Répartition TRÈFLE (25 ans)</h3>
+        <div class="pillar">🟩 Fonds de vie (30%) <span class="value" id="vie"></span></div>
+        <div class="pillar">🟧 Fonds plaisir (10%) <span class="value" id="plaisir"></span></div>
+        <div class="pillar">🟦 Investissements modérés (15%)<span class="value" id="modere"></span></div>
+        <div class="pillar">🟥 Immobilier 50:50 (15%) <span class="value" id="immo"></span></div>
+        <div class="pillar">🟪 Dons (10%) <span class="value" id="dons"></span></div>
+        <div class="pillar">⬜ Héritiers (20%) <span class="value" id="herit"></span></div>
+    </div>
+</div>
+
+</body>
+</html>

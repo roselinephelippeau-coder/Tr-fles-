@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Trèfle – Simulateur patrimonial</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root {
+      --bg: #050713;
+      --bg-card: #101321;
+      --accent: #26e6a0;
+      --accent-soft: rgba(38, 230, 160, 0.15);
+      --text: #f5f7ff;
+      --muted: #a4a8c3;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #151a33 0, #050713 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .app { width: 100%; max-width: 900px; }
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .logo { display: flex; align-items: center; gap: 8px; }
+    .logo-icon {
+      width: 32px; height: 32px; border-radius: 10px;
+      border: 1px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 18px; color: var(--accent);
+      background: radial-gradient(circle at top, #122 0, #050713 70%);
+    }
+    .logo-text { font-weight: 600; letter-spacing: 0.03em; }
+
+    .badge {
+      padding: 4px 10px; border-radius: 999px;
+      border: 1px solid var(--accent-soft);
+      font-size: 12px; color: var(--muted);
+      background: rgba(9, 14, 35, 0.7);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0,1.2fr) minmax(0,1fr);
+      gap: 16px;
+    }
+
+    @media(max-width: 768px){
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: rgba(9,13,32,0.96);
+      border-radius:16px;
+      padding:16px 18px;
+      box-shadow:0 16px 40px rgba(0,0,0,0.45);
+      border:1px solid rgba(255,255,255,0.03);
+      backdrop-filter:blur(16px);
+    }
+
+    .card-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+    .card-title{ font-size:16px; font-weight:600;}
+    .card-sub{ font-size:12px; color:var(--muted);}
+
+    .slider-row{ margin-top:12px; margin-bottom:10px;}
+    .slider-row label{
+      font-size:13px; color:var(--muted);
+      display:flex; justify-content:space-between; align-items:baseline;
+    }
+    .slider-row strong{ color:var(--text); font-size:14px;}
+
+    input[type="range"]{
+      width:100%; margin-top:10px; height:6px;
+      border-radius:999px; background:rgba(255,255,255,0.08);
+      -webkit-appearance:none; appearance:none;
+    }
+    input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      width:18px; height:18px; border-radius:50%;
+      background:var(--accent); border:2px solid #02040a;
+      box-shadow:0 0 0 4px rgba(38,230,160,0.28);
+    }
+    input[type="range"]::-moz-range-thumb{
+      width:18px; height:18px; border-radius:50%;
+      background:var(--accent); border:2px solid #02040a;
+      box-shadow:0 0 0 4px rgba(38,230,160,0.28);
+    }
+
+    .chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
+    .chip{
+      padding:4px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,0.08);
+      font-size:12px; color:var(--muted);
+      background:rgba(15,18,40,0.8);
+      cursor:pointer;
+    }
+    .chip.active{
+      border-color:var(--accent); color:var(--accent);
+      background:var(--accent-soft);
+    }
+
+    .big-number{margin-top:6px; font-size:22px; font-weight:600;}
+    .big-number span{ color:var(--accent); }
+
+    .row{
+      display:flex; justify-content:space-between;
+      margin-top:4px; font-size:13px; color:var(--muted);
+    }
+    .row strong{ color:var(--text); }
+
+    .pillars{
+      margin-top:12px; border-top:1px solid rgba(255,255,255,0.06);
+      padding-top:10px;
+    }
+    .pillar-row{
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:13px; margin:4px 0;
+    }
+
+    .pill-name{ display:flex; align-items:center; gap:6px; color:var(--muted);}
+    .pill-dot{ width:10px; height:10px; border-radius:999px;}
+
+    .pill-value{ font-weight:600; color:var(--text); }
+
+    .dot-vie{ background:#33e6b0;}
+    .dot-plaisir{ background:#f5a623;}
+    .dot-modere{ background:#4aa3ff;}
+    .dot-immo{ background:#ff4f6a;}
+    .dot-dons{ background:#c86bff;}
+    .dot-herit{ background:#f2f2f2;}
+
+    .mini-chart{
+      margin-top:8px; height:60px; border-radius:10px;
+      background:linear-gradient(135deg, rgba(38,230,160,0.12), rgba(69,99,255,0.04));
+      position:relative; overflow:hidden;
+    }
+
+    .mini-bar{
+      position:absolute; bottom:0; width:5px;
+      border-radius:999px;
+      background:linear-gradient(to top, var(--accent), #7af7cf);
+      opacity:0.85;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <header class="app-header">
+      <div class="logo">
+        <div class="logo-icon">♣</div>
+        <div class="logo-text">Trèfle – Plan patrimonial</div>
+      </div>
+
+      <div class="badge">
+        Année du gain = 0 • Projection : année +<span id="yearsLabel">25</span>
+      </div>
+    </header>
+
+    <main class="grid">
+
+      <!-- SIMULATEUR PRINCIPAL -->
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Simulateur global</div>
+            <div class="card-sub">Retrait TRÈFLE fixe (0,89 % du capital de départ)</div>
+          </div>
+        </div>
+
+        <!-- SLIDER CAPITAL -->
+        <div class="slider-row">
+          <label>
+            Capital de départ
+            <strong><span id="startDisplay">1 000 000</span> €</strong>
+          </label>
+          <input id="capitalRange" type="range" min="1000000" max="300000000" step="1000000" />
+        </div>
+
+        <!-- CHIPS D’ANNÉES -->
+        <div class="chips">
+          <span class="chip" data-years="1">Année +1</span>
+          <span class="chip" data-years="5">Année +5</span>
+          <span class="chip" data-years="10">Année +10</span>
+          <span class="chip" data-years="20">Année +20</span>
+          <span class="chip active" data-years="25">Année +25</span>
+          <span class="chip" data-years="40">Année +40</span>
+        </div>
+
+        <!-- CHIFFRES -->
+        <div class="big-number">
+          Capital projeté (année +<span id="yearsText">25</span>) :
+          <span id="capitalFuture">0</span> €
+        </div>
+
+        <div class="row">
+          <span>Retrait annuel TRÈFLE (fixe 0,89 %)</span>
+          <strong id="withdrawTrefle">0 €</strong>
+        </div>
+
+        <div class="row">
+          <span>Retrait mensuel</span>
+          <strong id="withdrawMonthly">0 €</strong>
+        </div>
+
+        <div class="mini-chart" id="miniChart"></div>
+      </section>
+
+      <!-- 6 PILIERS -->
+      <section class="card">
+
+        <div class="card-header">
+          <div>
+            <div class="card-title">Répartition TRÈFLE (capital projeté)</div>
+            <div class="card-sub">6 piliers appliqués au capital futur</div>
+          </div>
+        </div>
+
+        <div class="pillars">
+          <div class="pillar-row"><div class="pill-name"><div class="pill-dot dot-vie"></div>🟩 Fonds de vie (30%)</div><div class="pill-value" id="pVie">0 €</div></div>
+          <div class="pillar-row"><div class="pill-name"><div class="pill-dot dot-plaisir"></div>🟧 Fonds plaisir (10%)</div><div class="pill-value" id="pPlaisir">0 €</div></div>
+          <div class="pillar-row"><div class="pill-name"><div class="pill-dot dot-modere"></div>🟦 Investissements modérés (15%)</div><div class="pill-value" id="pModere">0 €</div></div>
+          <div class="pillar-row"><div class="pill-name"><div class="pill-dot dot-immo"></div>🟥 Immobilier 50:50 (15%)</div><div class="pill-value" id="pImmo">0 €</div></div>
+          <div class="pillar-row"><div class="pill-name"><div class="pill-dot dot-dons"></div>🟪 Dons (10%)</div><div class="pill-value" id="pDons">0 €</div></div>
+          <div class="pillar-row"><div class="pill-name"><div class="pill-dot dot-herit"></div>⬜ Héritiers (20%)</div><div class="pill-value" id="pHerit">0 €</div></div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+<script>
+function formatEuro(n) {
+  return n.toLocaleString('fr-FR', {maximumFractionDigits:0});
+}
+
+function simulate(capitalStart, years) {
+  let cap = capitalStart;
+  const rate = 0.03;
+  const withdrawal = capitalStart * 0.0089;  
+  const hist = [cap];
+
+  for(let i=0;i<years;i++){
+    cap = cap*(1+rate) - withdrawal;
+    hist.push(cap);
+  }
+  return hist;
+}
+
+const capitalRange = document.getElementById("capitalRange");
+const startDisplay = document.getElementById("startDisplay");
+const capitalFuture = document.getElementById("capitalFuture");
+const withdrawTrefle = document.getElementById("withdrawTrefle");
+const withdrawMonthly = document.getElementById("withdrawMonthly");
+const yearsLabel = document.getElementById("yearsLabel");
+const yearsText = document.getElementById("yearsText");
+
+const pVie = document.getElementById("pVie");
+const pPlaisir = document.getElementById("pPlaisir");
+const pModere = document.getElementById("pModere");
+const pImmo = document.getElementById("pImmo");
+const pDons = document.getElementById("pDons");
+const pHerit = document.getElementById("pHerit");
+
+const chips = document.querySelectorAll(".chip");
+const miniChart = document.getElementById("miniChart");
+
+let selectedYears = 25;
+
+function update(){
+  const start = parseFloat(capitalRange.value);
+  startDisplay.textContent = formatEuro(start);
+
+  const withdrawal = start * 0.0089;
+  const hist = simulate(start, selectedYears);
+  const last = hist[hist.length-1];
+
+  capitalFuture.textContent = formatEuro(last)+" €";
+  withdrawTrefle.textContent = formatEuro(withdrawal)+" €";
+  withdrawMonthly.textContent = formatEuro(withdrawal/12)+" €";
+
+  pVie.textContent = formatEuro(last*0.30)+" €";
+  pPlaisir.textContent = formatEuro(last*0.10)+" €";
+  pModere.textContent = formatEuro(last*0.15)+" €";
+  pImmo.textContent = formatEuro(last*0.15)+" €";
+  pDons.textContent = formatEuro(last*0.10)+" €";
+  pHerit.textContent = formatEuro(last*0.20)+" €";
+
+  yearsLabel.textContent = selectedYears;
+  yearsText.textContent = selectedYears;
+
+  drawMiniChart(hist);
+}
+
+function drawMiniChart(hist){
+  miniChart.innerHTML = "";
+  const max = Math.max(...hist);
+  const width = miniChart.clientWidth || 260;
+  const barWidth = Math.max(3, Math.floor(width / (hist.length*1.8)));
+
+  hist.forEach((val,i)=>{
+    const bar = document.createElement("div");
+    bar.className="mini-bar";
+    bar.style.height = (val/max*100)+"%";
+    bar.style.left = (i*(barWidth+2))+"px";
+    miniChart.appendChild(bar);
+  });
+}
+
+capitalRange.addEventListener("input", update);
+
+chips.forEach(chip=>{
+  chip.addEventListener("click",()=>{
+    chips.forEach(c=>c.classList.remove("active"));
+    chip.classList.add("active");
+    selectedYears = parseInt(chip.dataset.years);
+    update();
+  });
+});
+
+update();
+</script>
+
+</body>
+</html>
